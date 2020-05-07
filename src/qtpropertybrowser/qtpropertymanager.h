@@ -273,7 +273,7 @@ private:
 
 class QtKeySequencePropertyManagerPrivate;
 
-class QtKeySequencePropertyManager : public QtAbstractPropertyManager
+class QTPROPERTYBROWSER_EXPORT QtKeySequencePropertyManager : public QtAbstractPropertyManager
 {
     Q_OBJECT
 public:
