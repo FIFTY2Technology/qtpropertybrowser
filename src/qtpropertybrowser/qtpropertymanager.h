@@ -1,41 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the tools applications of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QTPROPERTYMANAGER_H
 #define QTPROPERTYMANAGER_H
@@ -50,6 +14,7 @@ class QDate;
 class QTime;
 class QDateTime;
 class QLocale;
+class QRegularExpression;
 
 class QtGroupPropertyManager : public QtAbstractPropertyManager
 {
@@ -59,10 +24,10 @@ public:
     ~QtGroupPropertyManager();
 
 protected:
-    virtual bool hasValue(const QtProperty *property) const;
+    bool hasValue(const QtProperty *property) const override;
 
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 };
 
 class QtIntPropertyManagerPrivate;
@@ -90,13 +55,13 @@ Q_SIGNALS:
     void rangeChanged(QtProperty *property, int minVal, int maxVal);
     void singleStepChanged(QtProperty *property, int step);
 protected:
-    QString valueText(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtIntPropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtIntPropertyManager)
-    Q_DISABLE_COPY(QtIntPropertyManager)
+    Q_DISABLE_COPY_MOVE(QtIntPropertyManager)
 };
 
 class QtBoolPropertyManagerPrivate;
@@ -115,14 +80,14 @@ public Q_SLOTS:
 Q_SIGNALS:
     void valueChanged(QtProperty *property, bool val);
 protected:
-    QString valueText(const QtProperty *property) const;
-    QIcon valueIcon(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    QIcon valueIcon(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtBoolPropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtBoolPropertyManager)
-    Q_DISABLE_COPY(QtBoolPropertyManager)
+    Q_DISABLE_COPY_MOVE(QtBoolPropertyManager)
 };
 
 class QtDoublePropertyManagerPrivate;
@@ -153,13 +118,13 @@ Q_SIGNALS:
     void singleStepChanged(QtProperty *property, double step);
     void decimalsChanged(QtProperty *property, int prec);
 protected:
-    QString valueText(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtDoublePropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtDoublePropertyManager)
-    Q_DISABLE_COPY(QtDoublePropertyManager)
+    Q_DISABLE_COPY_MOVE(QtDoublePropertyManager)
 };
 
 class QtStringPropertyManagerPrivate;
@@ -172,22 +137,22 @@ public:
     ~QtStringPropertyManager();
 
     QString value(const QtProperty *property) const;
-    QRegExp regExp(const QtProperty *property) const;
+    QRegularExpression regExp(const QtProperty *property) const;
 
 public Q_SLOTS:
     void setValue(QtProperty *property, const QString &val);
-    void setRegExp(QtProperty *property, const QRegExp &regExp);
+    void setRegExp(QtProperty *property, const QRegularExpression &regExp);
 Q_SIGNALS:
     void valueChanged(QtProperty *property, const QString &val);
-    void regExpChanged(QtProperty *property, const QRegExp &regExp);
+    void regExpChanged(QtProperty *property, const QRegularExpression &regExp);
 protected:
-    QString valueText(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtStringPropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtStringPropertyManager)
-    Q_DISABLE_COPY(QtStringPropertyManager)
+    Q_DISABLE_COPY_MOVE(QtStringPropertyManager)
 };
 
 class QtDatePropertyManagerPrivate;
@@ -204,21 +169,21 @@ public:
     QDate maximum(const QtProperty *property) const;
 
 public Q_SLOTS:
-    void setValue(QtProperty *property, const QDate &val);
-    void setMinimum(QtProperty *property, const QDate &minVal);
-    void setMaximum(QtProperty *property, const QDate &maxVal);
-    void setRange(QtProperty *property, const QDate &minVal, const QDate &maxVal);
+    void setValue(QtProperty *property, QDate val);
+    void setMinimum(QtProperty *property, QDate minVal);
+    void setMaximum(QtProperty *property, QDate maxVal);
+    void setRange(QtProperty *property, QDate minVal, QDate maxVal);
 Q_SIGNALS:
-    void valueChanged(QtProperty *property, const QDate &val);
-    void rangeChanged(QtProperty *property, const QDate &minVal, const QDate &maxVal);
+    void valueChanged(QtProperty *property, QDate val);
+    void rangeChanged(QtProperty *property, QDate minVal, QDate maxVal);
 protected:
-    QString valueText(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtDatePropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtDatePropertyManager)
-    Q_DISABLE_COPY(QtDatePropertyManager)
+    Q_DISABLE_COPY_MOVE(QtDatePropertyManager)
 };
 
 class QtTimePropertyManagerPrivate;
@@ -233,17 +198,17 @@ public:
     QTime value(const QtProperty *property) const;
 
 public Q_SLOTS:
-    void setValue(QtProperty *property, const QTime &val);
+    void setValue(QtProperty *property, QTime val);
 Q_SIGNALS:
-    void valueChanged(QtProperty *property, const QTime &val);
+    void valueChanged(QtProperty *property, QTime val);
 protected:
-    QString valueText(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtTimePropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtTimePropertyManager)
-    Q_DISABLE_COPY(QtTimePropertyManager)
+    Q_DISABLE_COPY_MOVE(QtTimePropertyManager)
 };
 
 class QtDateTimePropertyManagerPrivate;
@@ -262,13 +227,13 @@ public Q_SLOTS:
 Q_SIGNALS:
     void valueChanged(QtProperty *property, const QDateTime &val);
 protected:
-    QString valueText(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtDateTimePropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtDateTimePropertyManager)
-    Q_DISABLE_COPY(QtDateTimePropertyManager)
+    Q_DISABLE_COPY_MOVE(QtDateTimePropertyManager)
 };
 
 class QtKeySequencePropertyManagerPrivate;
@@ -287,13 +252,13 @@ public Q_SLOTS:
 Q_SIGNALS:
     void valueChanged(QtProperty *property, const QKeySequence &val);
 protected:
-    QString valueText(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtKeySequencePropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtKeySequencePropertyManager)
-    Q_DISABLE_COPY(QtKeySequencePropertyManager)
+    Q_DISABLE_COPY_MOVE(QtKeySequencePropertyManager)
 };
 
 class QtCharPropertyManagerPrivate;
@@ -312,13 +277,13 @@ public Q_SLOTS:
 Q_SIGNALS:
     void valueChanged(QtProperty *property, const QChar &val);
 protected:
-    QString valueText(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtCharPropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtCharPropertyManager)
-    Q_DISABLE_COPY(QtCharPropertyManager)
+    Q_DISABLE_COPY_MOVE(QtCharPropertyManager)
 };
 
 class QtEnumPropertyManager;
@@ -340,13 +305,13 @@ public Q_SLOTS:
 Q_SIGNALS:
     void valueChanged(QtProperty *property, const QLocale &val);
 protected:
-    QString valueText(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtLocalePropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtLocalePropertyManager)
-    Q_DISABLE_COPY(QtLocalePropertyManager)
+    Q_DISABLE_COPY_MOVE(QtLocalePropertyManager)
     Q_PRIVATE_SLOT(d_func(), void slotEnumChanged(QtProperty *, int))
     Q_PRIVATE_SLOT(d_func(), void slotPropertyDestroyed(QtProperty *))
 };
@@ -369,13 +334,13 @@ public Q_SLOTS:
 Q_SIGNALS:
     void valueChanged(QtProperty *property, const QPoint &val);
 protected:
-    QString valueText(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtPointPropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtPointPropertyManager)
-    Q_DISABLE_COPY(QtPointPropertyManager)
+    Q_DISABLE_COPY_MOVE(QtPointPropertyManager)
     Q_PRIVATE_SLOT(d_func(), void slotIntChanged(QtProperty *, int))
     Q_PRIVATE_SLOT(d_func(), void slotPropertyDestroyed(QtProperty *))
 };
@@ -401,13 +366,13 @@ Q_SIGNALS:
     void valueChanged(QtProperty *property, const QPointF &val);
     void decimalsChanged(QtProperty *property, int prec);
 protected:
-    QString valueText(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtPointFPropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtPointFPropertyManager)
-    Q_DISABLE_COPY(QtPointFPropertyManager)
+    Q_DISABLE_COPY_MOVE(QtPointFPropertyManager)
     Q_PRIVATE_SLOT(d_func(), void slotDoubleChanged(QtProperty *, double))
     Q_PRIVATE_SLOT(d_func(), void slotPropertyDestroyed(QtProperty *))
 };
@@ -436,13 +401,13 @@ Q_SIGNALS:
     void valueChanged(QtProperty *property, const QSize &val);
     void rangeChanged(QtProperty *property, const QSize &minVal, const QSize &maxVal);
 protected:
-    QString valueText(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtSizePropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtSizePropertyManager)
-    Q_DISABLE_COPY(QtSizePropertyManager)
+    Q_DISABLE_COPY_MOVE(QtSizePropertyManager)
     Q_PRIVATE_SLOT(d_func(), void slotIntChanged(QtProperty *, int))
     Q_PRIVATE_SLOT(d_func(), void slotPropertyDestroyed(QtProperty *))
 };
@@ -474,13 +439,13 @@ Q_SIGNALS:
     void rangeChanged(QtProperty *property, const QSizeF &minVal, const QSizeF &maxVal);
     void decimalsChanged(QtProperty *property, int prec);
 protected:
-    QString valueText(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtSizeFPropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtSizeFPropertyManager)
-    Q_DISABLE_COPY(QtSizeFPropertyManager)
+    Q_DISABLE_COPY_MOVE(QtSizeFPropertyManager)
     Q_PRIVATE_SLOT(d_func(), void slotDoubleChanged(QtProperty *, double))
     Q_PRIVATE_SLOT(d_func(), void slotPropertyDestroyed(QtProperty *))
 };
@@ -506,13 +471,13 @@ Q_SIGNALS:
     void valueChanged(QtProperty *property, const QRect &val);
     void constraintChanged(QtProperty *property, const QRect &constraint);
 protected:
-    QString valueText(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtRectPropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtRectPropertyManager)
-    Q_DISABLE_COPY(QtRectPropertyManager)
+    Q_DISABLE_COPY_MOVE(QtRectPropertyManager)
     Q_PRIVATE_SLOT(d_func(), void slotIntChanged(QtProperty *, int))
     Q_PRIVATE_SLOT(d_func(), void slotPropertyDestroyed(QtProperty *))
 };
@@ -541,13 +506,13 @@ Q_SIGNALS:
     void constraintChanged(QtProperty *property, const QRectF &constraint);
     void decimalsChanged(QtProperty *property, int prec);
 protected:
-    QString valueText(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtRectFPropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtRectFPropertyManager)
-    Q_DISABLE_COPY(QtRectFPropertyManager)
+    Q_DISABLE_COPY_MOVE(QtRectFPropertyManager)
     Q_PRIVATE_SLOT(d_func(), void slotDoubleChanged(QtProperty *, double))
     Q_PRIVATE_SLOT(d_func(), void slotPropertyDestroyed(QtProperty *))
 };
@@ -574,14 +539,14 @@ Q_SIGNALS:
     void enumNamesChanged(QtProperty *property, const QStringList &names);
     void enumIconsChanged(QtProperty *property, const QMap<int, QIcon> &icons);
 protected:
-    QString valueText(const QtProperty *property) const;
-    QIcon valueIcon(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    QIcon valueIcon(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtEnumPropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtEnumPropertyManager)
-    Q_DISABLE_COPY(QtEnumPropertyManager)
+    Q_DISABLE_COPY_MOVE(QtEnumPropertyManager)
 };
 
 class QtFlagPropertyManagerPrivate;
@@ -605,13 +570,13 @@ Q_SIGNALS:
     void valueChanged(QtProperty *property, int val);
     void flagNamesChanged(QtProperty *property, const QStringList &names);
 protected:
-    QString valueText(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtFlagPropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtFlagPropertyManager)
-    Q_DISABLE_COPY(QtFlagPropertyManager)
+    Q_DISABLE_COPY_MOVE(QtFlagPropertyManager)
     Q_PRIVATE_SLOT(d_func(), void slotBoolChanged(QtProperty *, bool))
     Q_PRIVATE_SLOT(d_func(), void slotPropertyDestroyed(QtProperty *))
 };
@@ -635,13 +600,13 @@ public Q_SLOTS:
 Q_SIGNALS:
     void valueChanged(QtProperty *property, const QSizePolicy &val);
 protected:
-    QString valueText(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtSizePolicyPropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtSizePolicyPropertyManager)
-    Q_DISABLE_COPY(QtSizePolicyPropertyManager)
+    Q_DISABLE_COPY_MOVE(QtSizePolicyPropertyManager)
     Q_PRIVATE_SLOT(d_func(), void slotIntChanged(QtProperty *, int))
     Q_PRIVATE_SLOT(d_func(), void slotEnumChanged(QtProperty *, int))
     Q_PRIVATE_SLOT(d_func(), void slotPropertyDestroyed(QtProperty *))
@@ -667,14 +632,14 @@ public Q_SLOTS:
 Q_SIGNALS:
     void valueChanged(QtProperty *property, const QFont &val);
 protected:
-    QString valueText(const QtProperty *property) const;
-    QIcon valueIcon(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    QIcon valueIcon(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtFontPropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtFontPropertyManager)
-    Q_DISABLE_COPY(QtFontPropertyManager)
+    Q_DISABLE_COPY_MOVE(QtFontPropertyManager)
     Q_PRIVATE_SLOT(d_func(), void slotIntChanged(QtProperty *, int))
     Q_PRIVATE_SLOT(d_func(), void slotEnumChanged(QtProperty *, int))
     Q_PRIVATE_SLOT(d_func(), void slotBoolChanged(QtProperty *, bool))
@@ -701,14 +666,14 @@ public Q_SLOTS:
 Q_SIGNALS:
     void valueChanged(QtProperty *property, const QColor &val);
 protected:
-    QString valueText(const QtProperty *property) const;
-    QIcon valueIcon(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    QIcon valueIcon(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtColorPropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtColorPropertyManager)
-    Q_DISABLE_COPY(QtColorPropertyManager)
+    Q_DISABLE_COPY_MOVE(QtColorPropertyManager)
     Q_PRIVATE_SLOT(d_func(), void slotIntChanged(QtProperty *, int))
     Q_PRIVATE_SLOT(d_func(), void slotPropertyDestroyed(QtProperty *))
 };
@@ -731,14 +696,14 @@ public Q_SLOTS:
 Q_SIGNALS:
     void valueChanged(QtProperty *property, const QCursor &val);
 protected:
-    QString valueText(const QtProperty *property) const;
-    QIcon valueIcon(const QtProperty *property) const;
-    virtual void initializeProperty(QtProperty *property);
-    virtual void uninitializeProperty(QtProperty *property);
+    QString valueText(const QtProperty *property) const override;
+    QIcon valueIcon(const QtProperty *property) const override;
+    void initializeProperty(QtProperty *property) override;
+    void uninitializeProperty(QtProperty *property) override;
 private:
     QScopedPointer<QtCursorPropertyManagerPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtCursorPropertyManager)
-    Q_DISABLE_COPY(QtCursorPropertyManager)
+    Q_DISABLE_COPY_MOVE(QtCursorPropertyManager)
 };
 
 QT_END_NAMESPACE

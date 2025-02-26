@@ -1,41 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the tools applications of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:LGPL$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include "qteditorfactory.h"
 #include "qtpropertybrowserutils_p.h"
@@ -48,6 +12,7 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QMenu>
 #include <QtGui/QKeyEvent>
+#include <QtGui/QRegularExpressionValidator>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QToolButton>
@@ -56,6 +21,7 @@
 #include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QKeySequenceEdit>
 #include <QtCore/QMap>
+#include <QtCore/QRegularExpression>
 
 #if defined(Q_CC_MSVC)
 #    pragma warning(disable: 4786) /* MS VS 6: truncating debug info after 255 characters */
@@ -124,7 +90,7 @@ void EditorFactoryPrivate<Editor>::slotEditorDestroyed(QObject *object)
             const typename PropertyToEditorListMap::iterator pit = m_createdEditors.find(property);
             if (pit != m_createdEditors.end()) {
                 pit.value().removeAll(editor);
-                if (pit.value().empty())
+                if (pit.value().isEmpty())
                     m_createdEditors.erase(pit);
             }
             m_editorToProperty.erase(itEditor);
@@ -889,7 +855,7 @@ class QtLineEditFactoryPrivate : public EditorFactoryPrivate<QLineEdit>
 public:
 
     void slotPropertyChanged(QtProperty *property, const QString &value);
-    void slotRegExpChanged(QtProperty *property, const QRegExp &regExp);
+    void slotRegExpChanged(QtProperty *property, const QRegularExpression &regExp);
     void slotSetValue(const QString &value);
 };
 
@@ -907,7 +873,7 @@ void QtLineEditFactoryPrivate::slotPropertyChanged(QtProperty *property,
 }
 
 void QtLineEditFactoryPrivate::slotRegExpChanged(QtProperty *property,
-            const QRegExp &regExp)
+            const QRegularExpression &regExp)
 {
     const auto it = m_createdEditors.constFind(property);
     if (it == m_createdEditors.constEnd())
@@ -920,9 +886,9 @@ void QtLineEditFactoryPrivate::slotRegExpChanged(QtProperty *property,
     for (QLineEdit *editor : it.value()) {
         editor->blockSignals(true);
         const QValidator *oldValidator = editor->validator();
-        QValidator *newValidator = 0;
+        QValidator *newValidator = nullptr;
         if (regExp.isValid()) {
-            newValidator = new QRegExpValidator(regExp, editor);
+            newValidator = new QRegularExpressionValidator(regExp, editor);
         }
         editor->setValidator(newValidator);
         if (oldValidator)
@@ -985,8 +951,8 @@ void QtLineEditFactory::connectPropertyManager(QtStringPropertyManager *manager)
 {
     connect(manager, SIGNAL(valueChanged(QtProperty*,QString)),
                 this, SLOT(slotPropertyChanged(QtProperty*,QString)));
-    connect(manager, SIGNAL(regExpChanged(QtProperty*,QRegExp)),
-                this, SLOT(slotRegExpChanged(QtProperty*,QRegExp)));
+    connect(manager, SIGNAL(regExpChanged(QtProperty*,QRegularExpression)),
+                this, SLOT(slotRegExpChanged(QtProperty*,QRegularExpression)));
 }
 
 /*!
@@ -999,9 +965,9 @@ QWidget *QtLineEditFactory::createEditor(QtStringPropertyManager *manager,
 {
 
     QLineEdit *editor = d_ptr->createEditor(property, parent);
-    QRegExp regExp = manager->regExp(property);
-    if (regExp.isValid()) {
-        QValidator *validator = new QRegExpValidator(regExp, editor);
+    QRegularExpression regExp = manager->regExp(property);
+    if (regExp.isValid() && !regExp.pattern().isEmpty()) {
+        QValidator *validator = new QRegularExpressionValidator(regExp, editor);
         editor->setValidator(validator);
     }
     editor->setText(manager->value(property));
@@ -1022,8 +988,8 @@ void QtLineEditFactory::disconnectPropertyManager(QtStringPropertyManager *manag
 {
     disconnect(manager, SIGNAL(valueChanged(QtProperty*,QString)),
                 this, SLOT(slotPropertyChanged(QtProperty*,QString)));
-    disconnect(manager, SIGNAL(regExpChanged(QtProperty*,QRegExp)),
-                this, SLOT(slotRegExpChanged(QtProperty*,QRegExp)));
+    disconnect(manager, SIGNAL(regExpChanged(QtProperty*,QRegularExpression)),
+                this, SLOT(slotRegExpChanged(QtProperty*,QRegularExpression)));
 }
 
 // QtDateEditFactory
@@ -1034,12 +1000,12 @@ class QtDateEditFactoryPrivate : public EditorFactoryPrivate<QDateEdit>
     Q_DECLARE_PUBLIC(QtDateEditFactory)
 public:
 
-    void slotPropertyChanged(QtProperty *property, const QDate &value);
-    void slotRangeChanged(QtProperty *property, const QDate &min, const QDate &max);
-    void slotSetValue(const QDate &value);
+    void slotPropertyChanged(QtProperty *property, QDate value);
+    void slotRangeChanged(QtProperty *property, QDate min, QDate max);
+    void slotSetValue(QDate value);
 };
 
-void QtDateEditFactoryPrivate::slotPropertyChanged(QtProperty *property, const QDate &value)
+void QtDateEditFactoryPrivate::slotPropertyChanged(QtProperty *property, QDate value)
 {
     const auto it = m_createdEditors.constFind(property);
     if (it == m_createdEditors.constEnd())
@@ -1051,8 +1017,7 @@ void QtDateEditFactoryPrivate::slotPropertyChanged(QtProperty *property, const Q
     }
 }
 
-void QtDateEditFactoryPrivate::slotRangeChanged(QtProperty *property,
-                const QDate &min, const QDate &max)
+void QtDateEditFactoryPrivate::slotRangeChanged(QtProperty *property, QDate min, QDate max)
 {
     const auto it = m_createdEditors.constFind(property);
     if (it == m_createdEditors.constEnd())
@@ -1070,7 +1035,7 @@ void QtDateEditFactoryPrivate::slotRangeChanged(QtProperty *property,
     }
 }
 
-void QtDateEditFactoryPrivate::slotSetValue(const QDate &value)
+void QtDateEditFactoryPrivate::slotSetValue(QDate value)
 {
     QObject *object = q_ptr->sender();
     const QMap<QDateEdit *, QtProperty *>::ConstIterator  ecend = m_editorToProperty.constEnd();
@@ -1170,11 +1135,11 @@ class QtTimeEditFactoryPrivate : public EditorFactoryPrivate<QTimeEdit>
     Q_DECLARE_PUBLIC(QtTimeEditFactory)
 public:
 
-    void slotPropertyChanged(QtProperty *property, const QTime &value);
-    void slotSetValue(const QTime &value);
+    void slotPropertyChanged(QtProperty *property, QTime value);
+    void slotSetValue(QTime value);
 };
 
-void QtTimeEditFactoryPrivate::slotPropertyChanged(QtProperty *property, const QTime &value)
+void QtTimeEditFactoryPrivate::slotPropertyChanged(QtProperty *property, QTime value)
 {
     const auto it = m_createdEditors.constFind(property);
     if (it == m_createdEditors.constEnd())
@@ -1186,7 +1151,7 @@ void QtTimeEditFactoryPrivate::slotPropertyChanged(QtProperty *property, const Q
     }
 }
 
-void QtTimeEditFactoryPrivate::slotSetValue(const QTime &value)
+void QtTimeEditFactoryPrivate::slotSetValue(QTime value)
 {
     QObject *object = q_ptr->sender();
     const  QMap<QTimeEdit *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
@@ -1505,17 +1470,17 @@ public:
     QtCharEdit(QWidget *parent = 0);
 
     QChar value() const;
-    bool eventFilter(QObject *o, QEvent *e);
+    bool eventFilter(QObject *o, QEvent *e) override;
 public Q_SLOTS:
     void setValue(const QChar &value);
 Q_SIGNALS:
     void valueChanged(const QChar &value);
 protected:
-    void focusInEvent(QFocusEvent *e);
-    void focusOutEvent(QFocusEvent *e);
-    void keyPressEvent(QKeyEvent *e);
-    void keyReleaseEvent(QKeyEvent *e);
-    bool event(QEvent *e);
+    void focusInEvent(QFocusEvent *e) override;
+    void focusOutEvent(QFocusEvent *e) override;
+    void keyPressEvent(QKeyEvent *e) override;
+    void keyReleaseEvent(QKeyEvent *e) override;
+    bool event(QEvent *e) override;
 private slots:
     void slotClearChar();
 private:
@@ -1530,7 +1495,7 @@ QtCharEdit::QtCharEdit(QWidget *parent)
 {
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->addWidget(m_lineEdit);
-    layout->setMargin(0);
+    layout->setContentsMargins(QMargins());
     m_lineEdit->installEventFilter(this);
     m_lineEdit->setReadOnly(true);
     m_lineEdit->setFocusProxy(this);
@@ -1543,17 +1508,17 @@ bool QtCharEdit::eventFilter(QObject *o, QEvent *e)
     if (o == m_lineEdit && e->type() == QEvent::ContextMenu) {
         QContextMenuEvent *c = static_cast<QContextMenuEvent *>(e);
         QMenu *menu = m_lineEdit->createStandardContextMenu();
-        const QList<QAction *> actions = menu->actions();
+        const auto actions = menu->actions();
         for (QAction *action : actions) {
             action->setShortcut(QKeySequence());
             QString actionString = action->text();
             const int pos = actionString.lastIndexOf(QLatin1Char('\t'));
             if (pos > 0)
-                actionString = actionString.remove(pos, actionString.length() - pos);
+                actionString = actionString.remove(pos, actionString.size() - pos);
             action->setText(actionString);
         }
-        QAction *actionBefore = 0;
-        if (actions.count() > 0)
+        QAction *actionBefore = nullptr;
+        if (actions.size() > 0)
             actionBefore = actions[0];
         QAction *clearAction = new QAction(tr("Clear Char"), menu);
         menu->insertAction(actionBefore, clearAction);
@@ -1593,7 +1558,7 @@ void QtCharEdit::handleKeyEvent(QKeyEvent *e)
     }
 
     const QString text = e->text();
-    if (text.count() != 1)
+    if (text.size() != 1)
         return;
 
     const QChar c = text.at(0);
@@ -1819,7 +1784,7 @@ void QtEnumEditorFactoryPrivate::slotEnumNamesChanged(QtProperty *property,
         editor->blockSignals(true);
         editor->clear();
         editor->addItems(enumNames);
-        const int nameCount = enumNames.count();
+        const int nameCount = enumNames.size();
         for (int i = 0; i < nameCount; i++)
             editor->setItemIcon(i, enumIcons.value(i));
         editor->setCurrentIndex(manager->value(property));
@@ -1841,7 +1806,7 @@ void QtEnumEditorFactoryPrivate::slotEnumIconsChanged(QtProperty *property,
     const QStringList enumNames = manager->enumNames(property);
     for (QComboBox *editor : it.value()) {
         editor->blockSignals(true);
-        const int nameCount = enumNames.count();
+        const int nameCount = enumNames.size();
         for (int i = 0; i < nameCount; i++)
             editor->setItemIcon(i, enumIcons.value(i));
         editor->setCurrentIndex(manager->value(property));
@@ -1921,7 +1886,7 @@ QWidget *QtEnumEditorFactory::createEditor(QtEnumPropertyManager *manager, QtPro
     QStringList enumNames = manager->enumNames(property);
     editor->addItems(enumNames);
     QMap<int, QIcon> enumIcons = manager->enumIcons(property);
-    const int enumNamesCount = enumNames.count();
+    const int enumNamesCount = enumNames.size();
     for (int i = 0; i < enumNamesCount; i++)
         editor->setItemIcon(i, enumIcons.value(i));
     editor->setCurrentIndex(manager->value(property));
@@ -2080,7 +2045,7 @@ void QtCursorEditorFactory::connectPropertyManager(QtCursorPropertyManager *mana
 QWidget *QtCursorEditorFactory::createEditor(QtCursorPropertyManager *manager, QtProperty *property,
         QWidget *parent)
 {
-    QtProperty *enumProp = 0;
+    QtProperty *enumProp = nullptr;
     if (d_ptr->m_propertyToEnum.contains(property)) {
         enumProp = d_ptr->m_propertyToEnum[property];
     } else {
@@ -2121,7 +2086,7 @@ class QtColorEditWidget : public QWidget {
 public:
     QtColorEditWidget(QWidget *parent);
 
-    bool eventFilter(QObject *obj, QEvent *ev);
+    bool eventFilter(QObject *obj, QEvent *ev) override;
 
 public Q_SLOTS:
     void setValue(const QColor &value);
@@ -2318,7 +2283,7 @@ class QtFontEditWidget : public QWidget {
 public:
     QtFontEditWidget(QWidget *parent);
 
-    bool eventFilter(QObject *obj, QEvent *ev);
+    bool eventFilter(QObject *obj, QEvent *ev) override;
 
 public Q_SLOTS:
     void setValue(const QFont &value);
